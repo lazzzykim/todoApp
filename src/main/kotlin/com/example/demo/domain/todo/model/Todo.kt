@@ -1,5 +1,7 @@
 package com.example.demo.domain.todo.model
 
+import com.example.demo.domain.comment.model.Comment
+import com.example.demo.domain.comment.model.toResponse
 import com.example.demo.domain.todo.dto.TodoResponse
 import jakarta.persistence.*
 import java.time.LocalDateTime
@@ -21,7 +23,10 @@ class Todo(
     val createDate : LocalDateTime = LocalDateTime.now(),
 
     @Column(name = "modified_date")
-    var modifiedDate : LocalDateTime = LocalDateTime.now()
+    var modifiedDate : LocalDateTime = LocalDateTime.now(),
+
+    @OneToMany(mappedBy = "todo", cascade = [CascadeType.ALL], orphanRemoval = true)
+    var comment: MutableList<Comment> = mutableListOf()
 ) {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -32,6 +37,7 @@ fun Todo.toResponse(): TodoResponse {
     return TodoResponse(
         id = id!!,
         title = title,
-        description = description
+        description = description,
+        comment = comment.map { it.toResponse() }
     )
 }

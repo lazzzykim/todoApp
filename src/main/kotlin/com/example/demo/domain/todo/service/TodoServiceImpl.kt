@@ -1,5 +1,7 @@
 package com.example.demo.domain.todo.service
 
+import com.example.demo.domain.comment.model.toResponse
+import com.example.demo.domain.comment.repository.CommentRepository
 import com.example.demo.domain.exception.ModelNotFoundException
 import com.example.demo.domain.todo.dto.CreateTodoRequest
 import com.example.demo.domain.todo.dto.TodoResponse
@@ -14,25 +16,32 @@ import org.springframework.stereotype.Service
 
 @Service
 class TodoServiceImpl(
-    private val todoRepository: TodoRepository
-): TodoService {
+    private val todoRepository: TodoRepository,
+    private val commentRepository: CommentRepository
+
+) : TodoService {
     override fun getTodoList(): List<TodoResponse> {
         return todoRepository.findAll()
             .map { it.toResponse() }
     }
 
 
-    @StopWatch
+    //    @StopWatch
     override fun getTodoById(todoId: Long): TodoResponse {
         val todo = todoRepository.findByIdOrNull(todoId)
             ?: throw ModelNotFoundException("todo", todoId)
 
+        val comment = commentRepository.findByTodoId(todoId)
+
+
         return TodoResponse(
             id = todoId!!,
             title = todo.title,
-            description = todo.description
+            description = todo.description,
+            comment = comment.map { it.toResponse() }
         )
     }
+
     @Transactional
     override fun createTodo(request: CreateTodoRequest): TodoResponse {
         val todo = Todo(
@@ -46,9 +55,10 @@ class TodoServiceImpl(
     @Transactional
     override fun updateTodo(
         todoId: Long,
-        request: UpdateTodoRequest): TodoResponse {
+        request: UpdateTodoRequest
+    ): TodoResponse {
         val todo = todoRepository.findByIdOrNull(todoId)
-            ?: throw ModelNotFoundException("todo",todoId)
+            ?: throw ModelNotFoundException("todo", todoId)
 
         todo.title = request.title
         todo.description = request.description
@@ -59,7 +69,7 @@ class TodoServiceImpl(
     @Transactional
     override fun deleteTodo(todoId: Long) {
         val todo = todoRepository.findByIdOrNull(todoId)
-            ?: throw ModelNotFoundException("todo",todoId)
+            ?: throw ModelNotFoundException("todo", todoId)
 
         return todoRepository.delete(todo)
     }

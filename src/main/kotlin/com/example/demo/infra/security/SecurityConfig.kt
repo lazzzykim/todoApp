@@ -18,4 +18,4 @@ class SecurityConfig {
             .csrf { it.disable() }
             .build()
     }
-}
+  }
