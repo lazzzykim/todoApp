@@ -31,6 +31,13 @@ class GlobalHandlerException {
             .body(ErrorResponse(e.message))
     }
 
+    @ExceptionHandler(IllegalArgumentException::class)
+    fun handlerIllegalArgumentException(e: IllegalArgumentException): ResponseEntity<ErrorResponse> {
+        return ResponseEntity
+            .status(HttpStatus.BAD_REQUEST)
+            .body(ErrorResponse(e.message))
+    }
+
     @ExceptionHandler(InvalidCredentialException::class)
     fun handleInvalidCredentialException(e: InvalidCredentialException): ResponseEntity<ErrorResponse> {
         return ResponseEntity
